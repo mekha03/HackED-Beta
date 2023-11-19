@@ -1,92 +1,87 @@
-#include <LiquidCrystal.h>
-int rs = 4;
+#include <LiquidCrystal.h> //library for lcd
+
+//lcd pins
+int rs = 4; 
 int en = 5;
 int d4 = 10;
 int d5 = 11;
 int d6 = 12;
 int d7 = 13;
 
-
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+int voltageReading; //reading the voltage to use for light on or off
 
-int voltageReading;
+void setup(){
+  lcd.begin(16,2); 
 
-void setup() {
-  lcd.begin(16, 2);
-  // put your setup code here, to run once:
-
-  Serial.begin(9600); //turning terminal on
-  pinMode(9, OUTPUT); //set pin 9 as output
-  pinMode(A0, INPUT); //Set A0 Pin as an input
-
-
+  Serial.begin(9600); //terminal
+  pinMode(9,OUTPUT); 
+  pinMode(A0, INPUT);
 }
-
 bool lightOn;
-unsigned long startTime = 0; //initialize to zero
-unsigned long totalTimeOn = 0; //^
+unsigned long startTime = 0;
+unsigned long totalTimeOn = 0;
 unsigned long endTime = 0;
 bool previousState = lightOn;
 bool currentState;
 
-const int delay1 = 50;
+const int notificationInterval = 10000;  // Notification interval in milliseconds
+unsigned long lastNotificationTime = 0;
+unsigned long startOfCurrentInterval = 0;
+
+const int delay1 = 50; //adding a delay to make sure the voltage fluctuations arent affecting time too much 
 
 void loop() {
-  digitalWrite(9, HIGH); //Send a 5 V signal through pin 9
 
-  voltageReading = digitalRead(A0); //initializing voltageReading to port
+  digitalWrite(9, HIGH);  // Send a 5 V signal through pin 9
 
-  if (voltageReading){ 
+  voltageReading = digitalRead(A0); //read- A0 pin
+
+  //if voltage reading true, light is on- current state is that light is on
+  if (voltageReading) {
     lightOn = true;
-  }
-  else{
+    currentState = true;
+
+    //if current state was changed (we turned it on from previously off, start timer and start counting the totalTimeOn)
+    if (currentState != previousState) {
+      startTime = millis();
+      startOfCurrentInterval = startTime;  // Set the start time for the current interval
+      previousState = currentState;
+    }
+    //if voltage reading nothing, light is off- current state is that light is off
+  } else {
     lightOn = false;
-    }
-
-
-  if(lightOn){
-    currentState = true; //true because light is on (at this point current state is the lightOn value itself)
-
-    if(currentState != previousState){ //if the currentState is not equal to the previous light state
-        startTime = millis(); //
+    currentState = false;
+    
+    //if current state (of light being off) doesnt equal previous state (it was on before, now off)
+    //delay by a little, and if its reading less than 375V, calculate totalTimeOn when we turn it off
+    if (currentState != previousState) {
+      delay(delay1);
+      if (digitalRead(A0) < 375) {
+        endTime = millis();
+        totalTimeOn = totalTimeOn + (endTime - startTime);
         previousState = currentState;
-    }
-  }
-
-  if (!lightOn){
-      currentState = false;
-
-      if(currentState != previousState){
-        delay(delay1);
-        if (digitalRead(A0) < 375){
-          endTime = millis();
-          totalTimeOn = totalTimeOn + (endTime - startTime);
-          previousState = currentState;
       }
     }
   }
-    lcd.setCursor(7,0);
-    lcd.print(totalTimeOn/1000);
 
-  
+  lcd.setCursor(7, 0);
+  lcd.print(totalTimeOn / 1000);
 
- // Check if the user has entered a character in the Serial Monitor
-  if (Serial.available() > 0) {
-    char userInput = Serial.read();
-    if (userInput == 'q') { // User enters 'q' to request total time on
-      Serial.print("Total Time On: ");
-      Serial.print(totalTimeOn / 1000); // Convert to seconds
-      Serial.println(" s");
-      Serial.println(startTime);
-      Serial.println(endTime);
-
-    }
-    int timeNotif = Serial.read("What intervals do you want notifications in?(s)");
-    if (totalTimeOn%timeNotif == 0){
-      Serial.println("your light is on")
-    }
+  // Notification
+  if (lightOn && millis() - startOfCurrentInterval >= notificationInterval) {
+    Serial.println("Your light is still on");
+    startOfCurrentInterval = millis();  // Update the start time for the current interval
   }
 
-
+  // Check if the user has entered a character in the Serial Monitor
+  if (Serial.available() > 0) {
+    char userInput = Serial.read();
+    if (userInput == 'q') {
+      Serial.print("Total Time On: ");
+      Serial.print(totalTimeOn / 1000);
+      Serial.println(" s");
+    }
+  }
 }
