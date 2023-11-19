@@ -1,10 +1,10 @@
 #include <LiquidCrystal.h>
-int rs=7;
-int
-int
-int
-int
-int
+int rs = 4;
+int en = 5;
+int d4 = 10;
+int d5 = 11;
+int d6 = 12;
+int d7 = 13;
 
 
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -66,8 +66,8 @@ void loop() {
       }
     }
   }
-    lcd.setCursor(0,0);
-    lcd.print("HelloWorld");
+    lcd.setCursor(7,0);
+    lcd.print(totalTimeOn/1000);
 
   
 
@@ -81,6 +81,10 @@ void loop() {
       Serial.println(startTime);
       Serial.println(endTime);
 
+    }
+    int timeNotif = Serial.read("What intervals do you want notifications in?(s)");
+    if (totalTimeOn%timeNotif == 0){
+      Serial.println("your light is on")
     }
   }
 
