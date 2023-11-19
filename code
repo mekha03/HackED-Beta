@@ -1,0 +1,88 @@
+#include <LiquidCrystal.h>
+int rs=7;
+int
+int
+int
+int
+int
+
+
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+
+int voltageReading;
+
+void setup() {
+  lcd.begin(16, 2);
+  // put your setup code here, to run once:
+
+  Serial.begin(9600); //turning terminal on
+  pinMode(9, OUTPUT); //set pin 9 as output
+  pinMode(A0, INPUT); //Set A0 Pin as an input
+
+
+}
+
+bool lightOn;
+unsigned long startTime = 0; //initialize to zero
+unsigned long totalTimeOn = 0; //^
+unsigned long endTime = 0;
+bool previousState = lightOn;
+bool currentState;
+
+const int delay1 = 50;
+
+void loop() {
+  digitalWrite(9, HIGH); //Send a 5 V signal through pin 9
+
+  voltageReading = digitalRead(A0); //initializing voltageReading to port
+
+  if (voltageReading){ 
+    lightOn = true;
+  }
+  else{
+    lightOn = false;
+    }
+
+
+  if(lightOn){
+    currentState = true; //true because light is on (at this point current state is the lightOn value itself)
+
+    if(currentState != previousState){ //if the currentState is not equal to the previous light state
+        startTime = millis(); //
+        previousState = currentState;
+    }
+  }
+
+  if (!lightOn){
+      currentState = false;
+
+      if(currentState != previousState){
+        delay(delay1);
+        if (digitalRead(A0) < 375){
+          endTime = millis();
+          totalTimeOn = totalTimeOn + (endTime - startTime);
+          previousState = currentState;
+      }
+    }
+  }
+    lcd.setCursor(0,0);
+    lcd.print("HelloWorld");
+
+  
+
+ // Check if the user has entered a character in the Serial Monitor
+  if (Serial.available() > 0) {
+    char userInput = Serial.read();
+    if (userInput == 'q') { // User enters 'q' to request total time on
+      Serial.print("Total Time On: ");
+      Serial.print(totalTimeOn / 1000); // Convert to seconds
+      Serial.println(" s");
+      Serial.println(startTime);
+      Serial.println(endTime);
+
+    }
+  }
+
+
+}
