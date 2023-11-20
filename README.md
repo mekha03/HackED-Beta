@@ -51,5 +51,5 @@ Considering potential challenges in implementing data visualization with Python.
 
 **User Interface**
 - We want to make an app that gives the user the following options:
-          --> Allows user to set their notification interval
-          --> When the user receives the notification, it gives them the option to turn off the energy source.
+1. Allows user to set their notification interval
+2. When user receives the notification, it gives them the option to turn off the energy source.
