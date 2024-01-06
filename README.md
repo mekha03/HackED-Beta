@@ -44,7 +44,7 @@ Considering potential challenges in implementing data visualization with Python.
 
 ## What's next for Energy Conserver - AssortedFruits
 **Expansion:**
-- We want to expand to more light/energy sources
+- We want to expand to more effiecient light/energy sources
 
 **Data Visualization**
 - We want to provide a visual of energy usage (line graph over multiple days/weeks/etc.)
