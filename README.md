@@ -1,4 +1,6 @@
 # HackED Beta Project - Energy Conserver💡
+**Group Members:** Mekha George, Palak Sharma, Ayesha Aamer, Van Arriola
+
 🏆Winners of **1st Place** Hardware Project🏆
 ## Inspiration
 The cost of energy is increasing everyday. We wanted to help people save electricity and reduce their energy bills. 
